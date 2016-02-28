@@ -2,14 +2,14 @@
 using System.Collections;
 
 public class PlayerController : MonoBehaviour {
-    public float runSpeed;
+    public float speed, lean;
     public int direction; // -1 for left, 1 for right
 
-    private static Vector3 standCenter = new Vector3((float)-.2, (float)-.4, 0);
-    private static Vector3 standSize = new Vector3((float)1.3, (float)4.3, (float).8);
+    public Vector3 standCenter;// = new Vector3((float)-.2, (float)-.4, 0);
+    public Vector3 standSize;// = new Vector3((float)1.3, (float)4.3, (float).8);
 
-    private static Vector3 runCenter = new Vector3((float)-.45, (float)-.87, 0);
-    private static Vector3 runSize = new Vector3((float)2.2, (float)3.4, (float).8);
+    public Vector3 runCenter;// = new Vector3((float)-.45, (float)-.87, 0);
+    public Vector3 runSize;// = new Vector3((float)2.2, (float)3.4, (float).8);
 
     private Animator animator;
 
@@ -22,26 +22,74 @@ public class PlayerController : MonoBehaviour {
 	void Update () {
         float horiz = Input.GetAxis("Horizontal");
         float vert = Input.GetAxis("Vertical");
-
+        
         if (vert != 0) { //going in or out
-
+            moveUp(vert, horiz);
         } else if (horiz != 0) { //going right or left
-            moveSide(horiz);
+            moveHoriz(horiz);
 
         } else { //not moving
 
             if (animator.GetBool("RunningLeftRight")) { //if running
                 animator.SetBool("RunningLeftRight", false);
+
+                BoxCollider bc = GetComponent<BoxCollider>();
+                bc.center = standCenter;
+                bc.size = standSize;
             }
 
-            BoxCollider bc = GetComponent<BoxCollider>();
-            bc.center = standCenter;
-            bc.size = standSize;
+            if (animator.GetBool("JumpingIn")) { //if running
+                animator.SetBool("JumpingIn", false);
+                this.transform.localEulerAngles = new Vector3((float)0, (float)0, (float)0);
+            }
+        }
+    }
+
+    //for moving player up
+    void moveUp(float vert, float horiz) {
+        if (!animator.GetBool("JumpingIn")) { //if not already jumping in
+            animator.SetBool("JumpingIn", true);
+            if (vert < 0) {
+                this.transform.localEulerAngles = new Vector3((float)-lean, (float)0, (float)0);
+            }
+            else {
+                this.transform.localEulerAngles = new Vector3((float)lean, (float)0, (float)0);
+            }
+        }
+
+        if (animator.GetBool("RunningLeftRight")) { //turn off running
+            animator.SetBool("RunningLeftRight", false);
+        }
+
+        if (vert < 0) {
+            transform.Translate(Vector3.back * speed * Time.deltaTime, transform.parent);
+        } else {
+            transform.Translate(Vector3.forward * speed * Time.deltaTime, transform.parent);
+        }
+
+        //if also moving left or right
+        if (horiz != 0) {
+            //if direction is not the same as horizontal input
+            if ((direction < 0) != (horiz < 0)) {
+                FlipAnimation();
+            }
+
+            //move left or right by half speed
+            if (direction < 0) {
+                transform.Translate(Vector3.left * (speed/2) * Time.deltaTime, transform.parent);
+            } else {
+                transform.Translate(Vector3.right * (speed/2) * Time.deltaTime, transform.parent);
+            }
         }
     }
 
     //for moving player left or right
-    void moveSide(float horiz) {
+    void moveHoriz(float horiz) {
+        if (animator.GetBool("JumpingIn")) { //if running
+            animator.SetBool("JumpingIn", false);
+            this.transform.localEulerAngles = new Vector3((float)0, (float)0, (float)0);
+        }
+
         if (!animator.GetBool("RunningLeftRight")) { //if not already running
             animator.SetBool("RunningLeftRight", true);
 
@@ -54,11 +102,11 @@ public class PlayerController : MonoBehaviour {
         if ((direction < 0) != (horiz < 0)) {
             FlipAnimation();
         }
-        
+
         if (direction < 0) {
-            transform.Translate(Vector3.left * runSpeed * Time.deltaTime);
+            transform.Translate(Vector3.left * speed * Time.deltaTime, transform.parent);
         } else {
-            transform.Translate(Vector3.right * runSpeed * Time.deltaTime);
+            transform.Translate(Vector3.right * speed * Time.deltaTime, transform.parent);
         }
     }
 
