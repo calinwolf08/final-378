@@ -24,10 +24,10 @@ public class PlayerController : MonoBehaviour {
         float vert = Input.GetAxis("Vertical");
         
         if (vert != 0) { //going in or out
-            moveUp(vert, horiz);
+            moveInOut(vert, horiz);
         } else if (horiz != 0) { //going right or left
+            this.transform.localEulerAngles = new Vector3((float)0, (float)0, (float)0);
             moveHoriz(horiz);
-
         } else { //not moving
 
             if (animator.GetBool("RunningLeftRight")) { //if running
@@ -38,58 +38,38 @@ public class PlayerController : MonoBehaviour {
                 bc.size = standSize;
             }
 
-            if (animator.GetBool("JumpingIn")) { //if running
-                animator.SetBool("JumpingIn", false);
-                this.transform.localEulerAngles = new Vector3((float)0, (float)0, (float)0);
-            }
+            this.transform.localEulerAngles = new Vector3((float)0, (float)0, (float)0);
         }
     }
 
-    //for moving player up
-    void moveUp(float vert, float horiz) {
-        if (!animator.GetBool("JumpingIn")) { //if not already jumping in
-            animator.SetBool("JumpingIn", true);
-            if (vert < 0) {
-                this.transform.localEulerAngles = new Vector3((float)-lean, (float)0, (float)0);
-            }
-            else {
-                this.transform.localEulerAngles = new Vector3((float)lean, (float)0, (float)0);
-            }
+    //for moving player in and out
+    void moveInOut(float vert, float horiz) {
+        if (!animator.GetBool("RunningLeftRight")) { //if not already running
+            animator.SetBool("RunningLeftRight", true);
+
+            BoxCollider bc = GetComponent<BoxCollider>();
+            bc.center = runCenter;
+            bc.size = runSize;
         }
 
-        if (animator.GetBool("RunningLeftRight")) { //turn off running
-            animator.SetBool("RunningLeftRight", false);
-        }
-
+        //move in or out and rotate
         if (vert < 0) {
+            this.transform.localEulerAngles = new Vector3((float)-lean, (float)0, (float)0);
             transform.Translate(Vector3.back * speed * Time.deltaTime, transform.parent);
-        } else {
+        }
+        else {
+            this.transform.localEulerAngles = new Vector3((float)lean, (float)0, (float)0);
             transform.Translate(Vector3.forward * speed * Time.deltaTime, transform.parent);
         }
 
         //if also moving left or right
         if (horiz != 0) {
-            //if direction is not the same as horizontal input
-            if ((direction < 0) != (horiz < 0)) {
-                FlipAnimation();
-            }
-
-            //move left or right by half speed
-            if (direction < 0) {
-                transform.Translate(Vector3.left * (speed/2) * Time.deltaTime, transform.parent);
-            } else {
-                transform.Translate(Vector3.right * (speed/2) * Time.deltaTime, transform.parent);
-            }
+            moveHoriz(horiz);
         }
     }
 
     //for moving player left or right
     void moveHoriz(float horiz) {
-        if (animator.GetBool("JumpingIn")) { //if running
-            animator.SetBool("JumpingIn", false);
-            this.transform.localEulerAngles = new Vector3((float)0, (float)0, (float)0);
-        }
-
         if (!animator.GetBool("RunningLeftRight")) { //if not already running
             animator.SetBool("RunningLeftRight", true);
 
