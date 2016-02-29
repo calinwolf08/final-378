@@ -12,14 +12,16 @@ public class PlayerController : MonoBehaviour {
     public Vector3 runSize;// = new Vector3((float)2.2, (float)3.4, (float).8);
 
     private Animator animator;
+    private Rigidbody rb;
 
 	// Use this for initialization
 	void Start () {
         animator = this.GetComponent<Animator>();
+        rb = this.GetComponent<Rigidbody>();
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
         float horiz = Input.GetAxis("Horizontal");
         float vert = Input.GetAxis("Vertical");
         
@@ -27,7 +29,7 @@ public class PlayerController : MonoBehaviour {
             moveInOut(vert, horiz);
         } else if (horiz != 0) { //going right or left
             this.transform.localEulerAngles = new Vector3((float)0, (float)0, (float)0);
-            moveHoriz(horiz);
+            moveHoriz(horiz, transform.position);
         } else { //not moving
 
             if (animator.GetBool("RunningLeftRight")) { //if running
@@ -52,24 +54,32 @@ public class PlayerController : MonoBehaviour {
             bc.size = runSize;
         }
 
+        Vector3 toMove;
+
         //move in or out and rotate
         if (vert < 0) {
             this.transform.localEulerAngles = new Vector3((float)-lean, (float)0, (float)0);
-            transform.Translate(Vector3.back * speed * Time.deltaTime, transform.parent);
+            //transform.Translate(Vector3.back * speed * Time.deltaTime, transform.parent);
+            //rb.AddForce(Vector3.back * speed * Time.deltaTime);
+            toMove = transform.position + (Vector3.back * speed * Time.deltaTime);
         }
         else {
             this.transform.localEulerAngles = new Vector3((float)lean, (float)0, (float)0);
-            transform.Translate(Vector3.forward * speed * Time.deltaTime, transform.parent);
+            //transform.Translate(Vector3.forward * speed * Time.deltaTime, transform.parent);
+            //rb.AddForce(Vector3.forward * speed * Time.deltaTime);
+            toMove = transform.position + (Vector3.forward * speed * Time.deltaTime);
         }
 
         //if also moving left or right
         if (horiz != 0) {
-            moveHoriz(horiz);
+            moveHoriz(horiz, toMove);
+        } else {
+            rb.MovePosition(toMove);
         }
     }
 
     //for moving player left or right
-    void moveHoriz(float horiz) {
+    void moveHoriz(float horiz, Vector3 toMove) {
         if (!animator.GetBool("RunningLeftRight")) { //if not already running
             animator.SetBool("RunningLeftRight", true);
 
@@ -84,10 +94,17 @@ public class PlayerController : MonoBehaviour {
         }
 
         if (direction < 0) {
-            transform.Translate(Vector3.left * speed * Time.deltaTime, transform.parent);
+            //transform.Translate(Vector3.left * speed * Time.deltaTime, transform.parent);
+            //rb.AddForce(Vector3.left * speed * Time.deltaTime);
+            //rb.MovePosition(transform.position + (Vector3.left * speed * Time.deltaTime));
+            toMove += Vector3.left * speed * Time.deltaTime;
         } else {
-            transform.Translate(Vector3.right * speed * Time.deltaTime, transform.parent);
+            //transform.Translate(Vector3.right * speed * Time.deltaTime, transform.parent);
+            //rb.AddForce(Vector3.right * speed * Time.deltaTime);
+            toMove += Vector3.right * speed * Time.deltaTime;
         }
+
+        rb.MovePosition(toMove);
     }
 
     //change direction player is moving
