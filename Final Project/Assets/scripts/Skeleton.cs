@@ -34,17 +34,10 @@ public class Skeleton : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if (!anim.GetBool("death"))
+		if (!anim.GetBool ("death")) {
 			transform.position += new Vector3 (speed * Time.deltaTime, 0.0f, 0.0f);
-	}
-
-	void OnMouseDown(){
-		rig.AddForce (transform.TransformPoint(transform.right * 600));
-		rig.useGravity = true;
-        anim.SetBool("death", true);
-        anim.Play ("skel_collision");
-		//Destroy (gameObject,3);
-
+			anim.SetFloat ("speed",speed);
+		}
 	}
 
 	void OnCollisionEnter(Collision col){
@@ -59,6 +52,19 @@ public class Skeleton : MonoBehaviour {
             rig.isKinematic = true;
             rig.detectCollisions = false;
         }
+	}
+
+	void OnTriggerEnter(Collider other) {
+		if(other.name=="Player" && !anim.GetBool("death")) {
+			speed -= accel;
+			transform.position = other.transform.position;
+		}
+	}
+
+	void OnTriggerExit(Collider other) {
+		if (other.name == "Player" && !anim.GetBool("death")) {
+			speed += accel;
+		}
 	}
 
 }
