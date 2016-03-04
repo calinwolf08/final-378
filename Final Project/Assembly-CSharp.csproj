@@ -59,7 +59,7 @@
      <Compile Include="Assets\scripts\PlayerController_old.cs" />
      <Compile Include="Assets\scripts\Recolor.cs" />
      <Compile Include="Assets\scripts\Skeleton.cs" />
-     <Compile Include="Assets\scripts\skel_Death.cs" />
+     <Compile Include="Assets\scripts\punisher.cs" />
      <None Include="Assets\PyroParticles\Prefab\Materials\AdditiveTintable.shader" />
      <None Include="Assets\PyroParticles\Readme.txt" />
  <Reference Include="UnityEngine.Networking">
